@@ -1,4 +1,4 @@
 *.sw[a-zA-Z]
 .session
 .ycm*
-test
+demo

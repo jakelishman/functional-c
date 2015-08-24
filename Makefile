@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-Wall -Wextra
 
 all:
-	$(CC) $(CFLAGS) high_level.c test.c -o test
+	$(CC) $(CFLAGS) high_level.c demo.c -o demo
 
 clean:
-	rm test
+	rm demo
