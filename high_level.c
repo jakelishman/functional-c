@@ -37,7 +37,20 @@ void
 array_iter (const void *array, const size_t len, const size_t type_size,
             void (iter (const void *)))
 {
-    for (size_t i = 0; i < len; i++) (*iter)(array + (i * type_size));
+    if (len == 0) return;
+    (*iter)(array);
+    array_iter (array + type_size, len - 1, type_size, iter);
+}
+
+// Helper for indexed iteration.
+void
+array_iteri_helper (const size_t i, const void *array, const size_t len,
+                    const size_t type_size,
+                    void (iter (const size_t i, const void *el)))
+{
+    if (len == 0) return;
+    (*iter)(i, array);
+    array_iteri_helper (i + 1, array + type_size, len - 1, type_size, iter);
 }
 
 // Iterate through an array, performing a function on each element with the
@@ -46,7 +59,7 @@ void
 array_iteri (const void *array, const size_t len, const size_t type_size,
              void (iter (const size_t i, const void *el)))
 {
-    for (size_t i = 0; i < len; i++) (*iter)(i, array + (i * type_size));
+    return array_iteri_helper (0, array, len, type_size, iter);
 }
 
 // Fold an array into one value, given a starting state of that value, and a
@@ -56,8 +69,21 @@ void *
 array_fold  (const void *array, const size_t len, const size_t type_size,
              void (fold (void *state, const void *el)), void *state)
 {
-    for (size_t i = 0; i < len; i++) (*fold)(state, array + (i * type_size));
-    return state;
+    if (len == 0) return state;
+    (*fold)(state, array);
+    return array_fold (array + type_size, len - 1, type_size, fold, state);
+}
+
+// Helper for indexed array folding.
+void *
+array_foldi_helper (const size_t i, const void *array, const size_t len,
+                    const size_t type_size,
+                    void (fold (const size_t i, void *state, const void *el)),
+                    void *state)
+{
+    if (len == 0) return state;
+    (*fold)(i, state, array);
+    return array_foldi_helper (i + 1, array + type_size, len - 1, type_size, fold, state);
 }
 
 // Fold an array into one value, given a starting state of that value, and a
@@ -68,8 +94,7 @@ array_foldi (const void *array, const size_t len, const size_t type_size,
              void (fold (const size_t i, void *state, const void *el)),
              void *state)
 {
-    for (size_t i = 0; i < len; i++) (*fold)(i, state, array + (i * type_size));
-    return state;
+    return array_foldi_helper (0, array, len, type_size, fold, state);
 }
 
 // Reduce an array into one variable. Fails (returns NULL), if the length is
