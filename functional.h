@@ -1,5 +1,5 @@
-#ifndef __HIGH_LEVEL_H
-#define __HIGH_LEVEL_H
+#ifndef __FUNCTIONAL_H
+#define __FUNCTIONAL_H
 
 #include <stdlib.h>
 #include <string.h>
