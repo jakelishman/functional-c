@@ -1,19 +1,42 @@
 #include "functional.h"
 
+// Helper for array mapping.
+void
+array_map_helper (void *output, const void *array, const size_t len,
+                  const size_t in_type_size, const size_t out_type_size,
+                  void * (mapping (const void *el)))
+{
+    if (len == 0) return;
+    void *tmp = (*mapping)(array);
+    memcpy (output, tmp, out_type_size);
+    free (tmp);
+    array_map_helper (output + out_type_size, array + in_type_size, len - 1,
+                      in_type_size, out_type_size, mapping);
+}
+
 // Apply a mapping function to every element in an array, and return a new array
 // containing those values.
 void *
 array_map (const void *array, const size_t len, const size_t in_type_size,
-           const size_t out_type_size, void * (mapping (const void *)))
+           const size_t out_type_size, void * (mapping (const void *el)))
 {
-    void *tmp;
     void *output = malloc (len * out_type_size);
-    for (size_t i = 0; i < len; i++) {
-        tmp = (*mapping)(array + (i * in_type_size));
-        memcpy (output + (i * out_type_size), tmp, out_type_size);
-        free (tmp);
-    }
+    array_map_helper (output, array, len, in_type_size, out_type_size, mapping);
     return output;
+}
+
+// Helper for indexed array mapping.
+void
+array_mapi_helper (const size_t i, void *output, const void *array,
+                   const size_t len, const size_t in_type_size, const size_t out_type_size,
+                   void * (mapping (const size_t i, const void *el)))
+{
+    if (len == 0) return;
+    void *tmp = (*mapping)(i, array);
+    memcpy (output, tmp, out_type_size);
+    free (tmp);
+    array_mapi_helper (i + 1, output + out_type_size, array + in_type_size,
+                       len - 1, in_type_size, out_type_size, mapping);
 }
 
 // Apply a mapping function to every element in an array, also passing the index
